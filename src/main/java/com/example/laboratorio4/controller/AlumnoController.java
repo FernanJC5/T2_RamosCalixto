@@ -1,7 +1,7 @@
 package com.example.laboratorio4.controller;
 
-import com.example.laboratorio4.model.Producto;
-import com.example.laboratorio4.service.ProductoService;
+import com.example.laboratorio4.model.Alumno;
+import com.example.laboratorio4.service.AlumnoService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -17,49 +17,36 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/productos")
+@RequestMapping("/api/alumnos")
 public class ProductoController {
 
-    private final ProductoService productoService;
-
-    public ProductoController(ProductoService productoService) {
-        this.productoService = productoService;
-    }
+    private final AlumnoService service;
+    public AlumnoController(AlumnoService service) { this.service = service; }
 
     @GetMapping
-    public List<Producto> listar() {
-        return productoService.listarTodos();
-    }
+    public List<Alumno> listar() { return service.listar(); }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Producto> buscarPorId(@PathVariable Long id) {
-        return productoService.buscarPorId(id)
-                .map(ResponseEntity::ok)
+    public ResponseEntity<Alumno> buscar(@PathVariable Long id) {
+        return service.buscar(id).map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping
-    public ResponseEntity<Producto> registrar(@RequestBody Producto producto) {
-        Producto guardado = productoService.registrar(producto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(guardado);
+    public ResponseEntity<Alumno> crear(@RequestBody Alumno a) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.guardar(a));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Producto> actualizar(
-            @PathVariable Long id,
-            @RequestBody Producto producto) {
-
-        return productoService.actualizar(id, producto)
-                .map(ResponseEntity::ok)
+    public ResponseEntity<Alumno> actualizar(@PathVariable Long id, @RequestBody Alumno a) {
+        return service.actualizar(id, a).map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminar(@PathVariable Long id) {
-        if (!productoService.eliminar(id)) {
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.noContent().build();
+        return service.eliminar(id) ? ResponseEntity.noContent().build()
+                                    : ResponseEntity.notFound().build();
     }
 
     @GetMapping("/buscar")
